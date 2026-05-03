@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMI 社会貢献通帳 — 足の８０２０</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Noto+Sans+JP:wght@300;400;500&family=DM+Mono&display=swap');
+
+:root {
+  --ink:        #1c1a14;
+  --ink-l:      #4a4638;
+  --ink-m:      #8a8474;
+  --paper:      #f5f0e8;
+  --paper-w:    #ede8dc;
+  --paper-d:    #e0d8c8;
+  --green:      #2d6a4f;
+  --green-l:    #52b788;
+  --green-p:    #d8f3dc;
+  --gold:       #b5872a;
+  --gold-p:     #fdf3dc;
+  --red:        #9b2226;
+  --border:     #c8bfa8;
+  --shadow:     rgba(28,26,20,.10);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+body{
+  font-family:'Noto Sans JP',sans-serif;
+  background:var(--paper);
+  color:var(--ink);
+  min-height:100vh;
+}
+
+/* ── ヘッダー ── */
+.hdr{
+  background:var(--ink);
+  padding:16px 24px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.hdr-logo{
+  font-family:'Playfair Display',serif;
+  font-size:18px;color:#fff;letter-spacing:.06em;
+}
+.hdr-logo span{color:var(--green-l);}
+.hdr-sub{font-size:10px;color:#666;letter-spacing:.12em;margin-top:2px;}
+.ami-badge{
+  background:var(--green);color:#fff;
+  font-family:'DM Mono',monospace;font-size:11px;
+  padding:4px 12px;border-radius:20px;letter-spacing:.1em;
+}
+
+/* ── メインレイアウト ── */
+.wrap{max-width:760px;margin:0 auto;padding:32px 16px 80px;}
+
+/* ── 通帳カバー ── */
+.passbook{
+  background:var(--ink);
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 8px 40px var(--shadow);
+  margin-bottom:32px;
+}
+.pb-cover{
+  padding:28px 32px 24px;
+  border-bottom:1px solid #2a2820;
+}
+.pb-cover-top{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  margin-bottom:20px;
+}
+.pb-title-block .pb-label{
+  font-size:10px;letter-spacing:.15em;color:#666;margin-bottom:6px;
+}
+.pb-title-block .pb-title{
+  font-family:'Playfair Display',serif;
+  font-size:22px;color:#fff;letter-spacing:.04em;
+}
+.pb-title-block .pb-title em{
+  color:var(--green-l);font-style:normal;
+}
+.pb-total{text-align:right;}
+.pb-total .t-label{font-size:10px;color:#666;letter-spacing:.1em;margin-bottom:4px;}
+.pb-total .t-val{
+  font-family:'Playfair Display',serif;
+  font-size:40px;color:var(--green-l);letter-spacing:.02em;line-height:1;
+}
+.pb-total .t-unit{
+  font-size:14px;color:#888;margin-left:4px;
+}
+.pb-total .t-jpy{
+  font-size:10px;color:#555;margin-top:4px;
+  font-family:'DM Mono',monospace;
+}
+
+/* 進捗バー */
+.pb-progress{
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;
+  margin-top:4px;
+}
+.prog-item .prog-label{font-size:10px;color:#666;letter-spacing:.08em;margin-bottom:5px;}
+.prog-bar{
+  height:4px;background:#2a2820;border-radius:2px;overflow:hidden;
+}
+.prog-fill{
+  height:100%;border-radius:2px;
+  transition:width .8s cubic-bezier(.4,0,.2,1);
+}
+.prog-fill.green{background:var(--green-l);}
+.prog-fill.gold{background:var(--gold);}
+.prog-nums{
+  display:flex;justify-content:space-between;
+  font-size:10px;color:#555;margin-top:3px;
+  font-family:'DM Mono',monospace;
+}
+
+/* ── タブ ── */
+.tabs{
+  display:flex;border-bottom:1px solid #2a2820;
+  background:var(--ink);
+}
+.tab{
+  flex:1;padding:12px;text-align:center;
+  font-size:12px;color:#555;cursor:pointer;
+  letter-spacing:.06em;transition:color .2s,border-color .2s;
+  border-bottom:2px solid transparent;
+}
+.tab.active{color:var(--green-l);border-bottom-color:var(--green-l);}
+.tab:hover:not(.active){color:#aaa;}
+
+/* ── 通帳ページ（取引履歴） ── */
+.pb-body{background:var(--paper);padding:0;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* 通帳テーブル */
+.ledger{width:100%;border-collapse:collapse;font-size:12px;}
+.ledger thead tr{background:var(--paper-w);}
+.ledger th{
+  padding:10px 14px;text-align:left;
+  font-size:10px;font-weight:500;color:var(--ink-m);
+  letter-spacing:.08em;border-bottom:1px solid var(--border);
+}
+.ledger th:last-child,.ledger td:last-child{text-align:right;}
+.ledger td{
+  padding:12px 14px;border-bottom:.5px solid var(--paper-d);
+  color:var(--ink-l);vertical-align:middle;
+}
+.ledger td.date-col{
+  font-family:'DM Mono',monospace;font-size:11px;
+  color:var(--ink-m);white-space:nowrap;
+}
+.ledger td.desc-col .desc-main{font-size:12px;color:var(--ink);}
+.ledger td.desc-col .desc-sub{font-size:10px;color:var(--ink-m);margin-top:2px;}
+.ledger td.ami-col{
+  font-family:'Playfair Display',serif;
+  font-size:16px;color:var(--green);text-align:right;
+}
+.ledger td.bal-col{
+  font-family:'DM Mono',monospace;font-size:12px;
+  text-align:right;color:var(--ink);font-weight:500;
+}
+.ledger tr.event-row{background:var(--green-p);}
+.ledger tr.event-row td.ami-col{color:var(--green);}
+.ledger tr:last-child td{border-bottom:none;}
+
+/* 節目バッジ */
+.milestone{
+  display:inline-block;font-size:9px;
+  background:var(--gold-p);color:var(--gold);
+  padding:2px 6px;border-radius:8px;
+  border:1px solid #e8d090;margin-left:6px;
+  font-family:'DM Mono',monospace;
+}
+
+/* ── 通年入力フォーム ── */
+.form-wrap{padding:24px;}
+.form-section{margin-bottom:24px;}
+.form-label{
+  font-size:11px;font-weight:500;color:var(--ink-m);
+  letter-spacing:.1em;margin-bottom:10px;display:block;
+}
+.month-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+  margin-bottom:16px;
+}
+@media(max-width:480px){.month-grid{grid-template-columns:repeat(3,1fr);}}
+.month-card{
+  background:var(--paper-w);border:1px solid var(--border);
+  border-radius:8px;padding:10px 8px;text-align:center;
+  cursor:pointer;transition:all .15s;
+}
+.month-card:hover{border-color:var(--green-l);background:var(--green-p);}
+.month-card.active{
+  border-color:var(--green);background:var(--green-p);
+}
+.month-card.event-month{
+  border-color:var(--gold);background:var(--gold-p);
+}
+.month-card .mc-name{font-size:11px;color:var(--ink-l);margin-bottom:4px;}
+.month-card .mc-val{
+  font-family:'Playfair Display',serif;
+  font-size:18px;color:var(--green);
+}
+.month-card.event-month .mc-val{color:var(--gold);}
+.month-card .mc-unit{font-size:9px;color:var(--ink-m);}
+
+/* 入力行 */
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+@media(max-width:480px){.input-row{grid-template-columns:1fr;}}
+.field label{
+  display:block;font-size:11px;color:var(--ink-m);
+  letter-spacing:.06em;margin-bottom:6px;
+}
+.field input,.field select{
+  width:100%;padding:10px 12px;
+  border:1px solid var(--border);border-radius:8px;
+  font-size:14px;font-family:'Noto Sans JP',sans-serif;
+  background:var(--paper);color:var(--ink);
+  transition:border-color .15s;
+}
+.field input:focus,.field select:focus{
+  outline:none;border-color:var(--green-l);background:#fff;
+}
+
+/* スライダー */
+.slider-row{margin-bottom:14px;}
+.sl-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+.sl-top span:first-child{font-size:11px;color:var(--ink-m);letter-spacing:.06em;}
+.sl-val{
+  font-family:'Playfair Display',serif;
+  font-size:20px;color:var(--green);
+}
+.sl-unit{font-size:11px;color:var(--ink-m);margin-left:2px;}
+input[type=range]{
+  width:100%;-webkit-appearance:none;
+  height:3px;border-radius:2px;background:var(--border);outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:18px;height:18px;
+  border-radius:50%;background:var(--green);cursor:pointer;
+  border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.2);
+}
+
+/* 追加ボタン */
+.add-btn{
+  width:100%;padding:14px;
+  background:var(--ink);color:#fff;
+  border:none;border-radius:10px;
+  font-size:14px;font-family:'Playfair Display',serif;
+  letter-spacing:.08em;cursor:pointer;
+  transition:background .2s,transform .1s;
+  margin-top:8px;
+}
+.add-btn:hover{background:var(--green);}
+.add-btn:active{transform:scale(.99);}
+
+/* ── 通帳印刷プレビュー ── */
+.print-wrap{padding:24px;}
+.print-header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:16px;
+}
+.print-header p{font-size:12px;color:var(--ink-m);}
+.print-btn{
+  padding:8px 20px;border:1px solid var(--border);border-radius:8px;
+  background:#fff;font-size:12px;font-family:'Noto Sans JP',sans-serif;
+  cursor:pointer;color:var(--ink);transition:background .15s;
+}
+.print-btn:hover{background:var(--ink);color:#fff;}
+
+/* 通帳印刷ドキュメント */
+#print-doc{
+  background:#fff;border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;
+  font-family:'Noto Sans JP',sans-serif;
+}
+.pd-head{
+  background:var(--ink);padding:20px 28px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.pd-head .ph-title{
+  font-family:'Playfair Display',serif;
+  font-size:18px;color:#fff;letter-spacing:.06em;
+}
+.pd-head .ph-title em{color:var(--green-l);font-style:normal;}
+.pd-head .ph-no{
+  font-family:'DM Mono',monospace;
+  font-size:11px;color:#666;
+}
+.pd-owner{
+  padding:16px 28px;border-bottom:1px solid var(--paper-d);
+  display:flex;justify-content:space-between;align-items:baseline;
+  background:var(--paper);
+}
+.pd-owner .own-name{
+  font-family:'Playfair Display',serif;font-size:20px;
+  border-bottom:1px solid var(--ink);padding-bottom:2px;min-width:180px;
+}
+.pd-owner .own-sub{font-size:10px;color:var(--ink-m);margin-top:4px;}
+.pd-owner .own-total{text-align:right;}
+.pd-owner .own-total .ot-label{font-size:10px;color:var(--ink-m);margin-bottom:2px;}
+.pd-owner .own-total .ot-val{
+  font-family:'Playfair Display',serif;
+  font-size:28px;color:var(--green);
+}
+.pd-owner .own-total .ot-unit{font-size:13px;color:var(--ink-m);margin-left:3px;}
+
+/* 年次サマリーテーブル */
+.pd-table{width:100%;border-collapse:collapse;font-size:12px;}
+.pd-table th{
+  background:var(--paper-w);padding:9px 16px;
+  text-align:left;font-size:10px;color:var(--ink-m);
+  letter-spacing:.08em;border-bottom:1px solid var(--border);
+  font-weight:500;
+}
+.pd-table th:last-child,.pd-table td:last-child{text-align:right;}
+.pd-table td{
+  padding:11px 16px;border-bottom:.5px solid var(--paper-d);
+  color:var(--ink-l);
+}
+.pd-table td.yr{font-family:'DM Mono',monospace;font-size:11px;}
+.pd-table td.ami{
+  font-family:'Playfair Display',serif;font-size:15px;
+  color:var(--green);text-align:right;
+}
+.pd-table td.bal{
+  font-family:'DM Mono',monospace;font-size:12px;
+  text-align:right;font-weight:500;
+}
+.pd-table tr.highlight{background:var(--green-p);}
+
+.pd-footer{
+  padding:16px 28px;background:var(--paper);
+  border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.pd-footer .pf-seal{
+  width:56px;height:56px;border-radius:50%;
+  border:2px solid var(--green);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:var(--green);text-align:center;line-height:1.4;
+  font-family:'Noto Sans JP',sans-serif;
+}
+.pd-footer .pf-info{font-size:11px;color:var(--ink-m);line-height:1.9;}
+
+/* ── AMI換算説明 ── */
+.ami-explain{
+  background:#fff;border:1px solid var(--border);
+  border-radius:12px;padding:20px 24px;margin-top:24px;
+}
+.ae-title{
+  font-size:11px;font-weight:500;color:var(--ink-m);
+  letter-spacing:.1em;margin-bottom:12px;
+  padding-bottom:8px;border-bottom:1px solid var(--paper-d);
+}
+.ae-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:480px){.ae-grid{grid-template-columns:1fr;}}
+.ae-item{
+  background:var(--paper);border-radius:8px;
+  padding:12px 14px;
+}
+.ae-item .ai-label{font-size:10px;color:var(--ink-m);margin-bottom:4px;}
+.ae-item .ai-val{font-size:13px;color:var(--ink);font-weight:500;}
+.ae-item .ai-val em{color:var(--green);font-style:normal;font-family:'Playfair Display',serif;font-size:16px;}
+
+/* ── SNSシェアボタン ── */
+.share-row{
+  display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;
+}
+.share-btn{
+  flex:1;min-width:120px;padding:11px;
+  border:1px solid var(--border);border-radius:8px;
+  background:#fff;font-size:12px;
+  font-family:'Noto Sans JP',sans-serif;
+  cursor:pointer;color:var(--ink);
+  transition:background .15s,border-color .15s;
+  text-align:center;
+}
+.share-btn:hover{background:var(--ink);color:#fff;border-color:var(--ink);}
+.share-btn.x-btn:hover{background:#000;border-color:#000;color:#fff;}
+
+/* 印刷 */
+@media print{
+  body{background:#fff;}
+  .hdr,.tabs,.tab-panel:not(#panel-print),.ami-explain,.share-row,
+  .print-header{display:none!important;}
+  #panel-print{display:block!important;}
+  .passbook{box-shadow:none;}
+  .pb-cover,.pb-body,.pb-progress,.pb-total{display:none!important;}
+  #print-doc{border:none;}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div>
+    <div class="hdr-logo"><span>AMI</span> 社会貢献通帳</div>
+    <div class="hdr-sub">足の８０２０ · SOCIAL CONTRIBUTION PASSBOOK</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <button onclick="downloadSelf()" style="padding:6px 16px;border:1px solid #444;border-radius:20px;background:transparent;color:#aaa;font-size:11px;font-family:'Noto Sans JP',sans-serif;cursor:pointer;letter-spacing:.06em;transition:background .15s,color .15s,border-color .15s;" onmouseover="this.style.background='#2d6a4f';this.style.color='#fff';this.style.borderColor='#2d6a4f'" onmouseout="this.style.background='transparent';this.style.color='#aaa';this.style.borderColor='#444'">このアプリを保存</button>
+    <div class="ami-badge">AMI v1.0</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ── 通帳カバー ── -->
+  <div class="passbook">
+    <div class="pb-cover">
+      <div class="pb-cover-top">
+        <div class="pb-title-block">
+          <div class="pb-label">SOCIAL CONTRIBUTION PASSBOOK</div>
+          <div class="pb-title">社会貢献通帳<br><em>AMI</em> 残高</div>
+        </div>
+        <div class="pb-total">
+          <div class="t-label">累計 AMI 残高</div>
+          <div>
+            <span class="t-val" id="total-ami">0</span>
+            <span class="t-unit">AMI</span>
+          </div>
+          <div class="t-jpy" id="total-ref">参考換算値を入力後に表示されます</div>
+        </div>
+      </div>
+      <div class="pb-progress">
+        <div class="prog-item">
+          <div class="prog-label">今年の歩行達成率</div>
+          <div class="prog-bar"><div class="prog-fill green" id="prog-walk" style="width:0%"></div></div>
+          <div class="prog-nums"><span id="prog-walk-l">0日</span><span>365日</span></div>
+        </div>
+        <div class="prog-item">
+          <div class="prog-label">AMI 目標達成率</div>
+          <div class="prog-bar"><div class="prog-fill gold" id="prog-ami" style="width:0%"></div></div>
+          <div class="prog-nums"><span id="prog-ami-l">0 AMI</span><span id="prog-ami-r">目標未設定</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- タブ -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('ledger',this)">取引履歴</div>
+      <div class="tab" onclick="switchTab('input',this)">記録を追加</div>
+      <div class="tab" onclick="switchTab('print',this)">通帳を印刷</div>
+    </div>
+
+    <div class="pb-body">
+
+      <!-- ── 取引履歴 ── -->
+      <div id="panel-ledger" class="tab-panel active">
+        <table class="ledger">
+          <thead>
+            <tr>
+              <th style="width:90px">日付</th>
+              <th>内容</th>
+              <th style="width:80px">AMI</th>
+              <th style="width:90px">残高</th>
+            </tr>
+          </thead>
+          <tbody id="ledger-body">
+            <tr><td colspan="4" style="text-align:center;padding:32px;color:var(--ink-m);font-size:12px;">「記録を追加」から歩行データを入力してください</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── 記録を追加 ── -->
+      <div id="panel-input" class="tab-panel">
+        <div class="form-wrap">
+
+          <!-- 基本情報（初回のみ） -->
+          <div class="form-section">
+            <span class="form-label">基本情報</span>
+            <div class="input-row">
+              <div class="field">
+                <label>お名前（通帳に記載）</label>
+                <input type="text" id="inp-name" placeholder="例：山田 花子">
+              </div>
+              <div class="field">
+                <label>AMI 年間目標</label>
+                <input type="number" id="inp-goal" placeholder="例：3000" min="100" max="99999">
+              </div>
+            </div>
+            <div class="input-row">
+              <div class="field">
+                <label>年齢層</label>
+                <select id="inp-age">
+                  <option value="30">30代</option>
+                  <option value="40">40代</option>
+                  <option value="50" selected>50代</option>
+                  <option value="60">60代</option>
+                  <option value="70">70代以上</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>居住地域</label>
+                <select id="inp-region">
+                  <option value="city">政令指定都市・大都市</option>
+                  <option value="urban" selected>地方中核都市</option>
+                  <option value="rural">町村・過疎地域</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 記録種別 -->
+          <div class="form-section">
+            <span class="form-label">記録種別を選択</span>
+            <div style="display:flex;gap:10px;margin-bottom:16px;">
+              <label style="flex:1;display:flex;align-items:center;gap:8px;padding:12px;background:var(--paper);border:1px solid var(--border);border-radius:8px;cursor:pointer;">
+                <input type="radio" name="rec-type" value="event" id="rt-event" checked onchange="switchRecType()">
+                <span style="font-size:13px;">5月イベント参加</span>
+              </label>
+              <label style="flex:1;display:flex;align-items:center;gap:8px;padding:12px;background:var(--paper);border:1px solid var(--border);border-radius:8px;cursor:pointer;">
+                <input type="radio" name="rec-type" value="daily" id="rt-daily" onchange="switchRecType()">
+                <span style="font-size:13px;">通年歩行記録</span>
+              </label>
+            </div>
+
+            <!-- イベント参加フォーム -->
+            <div id="form-event">
+              <div class="input-row">
+                <div class="field">
+                  <label>参加年度</label>
+                  <select id="ev-year">
+                    <option value="2026">2026年（第４回）</option>
+                    <option value="2025">2025年（第３回）</option>
+                    <option value="2024">2024年（第２回）</option>
+                    <option value="2023">2023年（第１回）</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>継続参加年数</label>
+                  <select id="ev-yrs">
+                    <option value="1">1年目</option>
+                    <option value="2">2年目</option>
+                    <option value="3">3年目</option>
+                    <option value="4">4年目</option>
+                  </select>
+                </div>
+              </div>
+              <div class="slider-row">
+                <div class="sl-top">
+                  <span>5月中に歩いた日数</span>
+                  <span><span class="sl-val" id="ev-days-v">18</span><span class="sl-unit">日 / 31日</span></span>
+                </div>
+                <input type="range" id="ev-days" min="1" max="31" value="18" step="1"
+                  oninput="document.getElementById('ev-days-v').textContent=this.value">
+              </div>
+              <div class="slider-row">
+                <div class="sl-top">
+                  <span>1日平均歩行時間</span>
+                  <span><span class="sl-val" id="ev-min-v">28</span><span class="sl-unit">分</span></span>
+                </div>
+                <input type="range" id="ev-min" min="20" max="90" value="28" step="1"
+                  oninput="document.getElementById('ev-min-v').textContent=this.value">
+              </div>
+            </div>
+
+            <!-- 通年歩行フォーム -->
+            <div id="form-daily" style="display:none">
+              <div class="input-row">
+                <div class="field">
+                  <label>対象年</label>
+                  <select id="dy-year">
+                    <option value="2026">2026年</option>
+                    <option value="2025">2025年</option>
+                    <option value="2024">2024年</option>
+                    <option value="2023">2023年</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>対象月</label>
+                  <select id="dy-month">
+                    <option value="1">1月</option><option value="2">2月</option>
+                    <option value="3">3月</option><option value="4">4月</option>
+                    <option value="5">5月</option><option value="6">6月</option>
+                    <option value="7">7月</option><option value="8">8月</option>
+                    <option value="9">9月</option><option value="10">10月</option>
+                    <option value="11">11月</option><option value="12">12月</option>
+                  </select>
+                </div>
+              </div>
+              <div class="slider-row">
+                <div class="sl-top">
+                  <span>この月に歩いた日数</span>
+                  <span><span class="sl-val" id="dy-days-v">18</span><span class="sl-unit">日</span></span>
+                </div>
+                <input type="range" id="dy-days" min="0" max="31" value="18" step="1"
+                  oninput="document.getElementById('dy-days-v').textContent=this.value">
+              </div>
+              <div class="slider-row">
+                <div class="sl-top">
+                  <span>1日平均歩行時間</span>
+                  <span><span class="sl-val" id="dy-min-v">25</span><span class="sl-unit">分</span></span>
+                </div>
+                <input type="range" id="dy-min" min="0" max="120" value="25" step="5"
+                  oninput="document.getElementById('dy-min-v').textContent=this.value">
+              </div>
+            </div>
+          </div>
+
+          <button class="add-btn" onclick="addRecord()">この記録をAMI通帳に入金する</button>
+        </div>
+      </div>
+
+      <!-- ── 通帳印刷 ── -->
+      <div id="panel-print" class="tab-panel">
+        <div class="print-wrap">
+          <div class="print-header">
+            <p>年次サマリー通帳を印刷・PDF保存できます</p>
+            <button class="print-btn" onclick="window.print()">印刷 / PDF保存</button>
+          </div>
+
+          <div id="print-doc">
+            <div class="pd-head">
+              <div class="ph-title">社会貢献通帳 &nbsp;<em>AMI</em></div>
+              <div class="ph-no" id="pd-no">No. ——</div>
+            </div>
+            <div class="pd-owner">
+              <div>
+                <div class="own-name" id="pd-name">　　　　　　　</div>
+                <div class="own-sub">殿　— 足の８０２０ 参加者</div>
+              </div>
+              <div class="own-total">
+                <div class="ot-label">累計 AMI 残高</div>
+                <div>
+                  <span class="ot-val" id="pd-total">0</span>
+                  <span class="ot-unit">AMI</span>
+                </div>
+              </div>
+            </div>
+            <table class="pd-table">
+              <thead>
+                <tr>
+                  <th>年度</th>
+                  <th>記録種別</th>
+                  <th>歩行日数</th>
+                  <th>AMI 獲得</th>
+                  <th>累計残高</th>
+                </tr>
+              </thead>
+              <tbody id="pd-table-body">
+                <tr><td colspan="5" style="text-align:center;padding:20px;color:var(--ink-m);">記録がありません</td></tr>
+              </tbody>
+            </table>
+            <div class="pd-footer">
+              <div class="pf-info">
+                <div>発行日：<span id="pd-date"></span></div>
+                <div style="margin-top:4px">一般社団法人　足の８０２０</div>
+                <div>ashino8020.github.io</div>
+                <div style="margin-top:6px;font-size:10px;color:#aaa">
+                  1 AMI = 1円換算の社会貢献参考単位。あなたの歩みが社会に届けた贈り物です。<br>
+                  参考換算値は厚労省・国立長寿研データに基づく推計値です。
+                </div>
+              </div>
+              <div class="pf-seal">足の<br>８０２０<br>AMI</div>
+            </div>
+          </div>
+
+          <!-- AMI換算説明 -->
+          <div class="ami-explain">
+            <div class="ae-title">AMI とは — 単位の説明</div>
+            <div class="ae-grid">
+              <div class="ae-item">
+                <div class="ai-label">言葉の意味</div>
+                <div class="ai-val">「歩み」（日本語）＋「友人」（仏語 Ami）＋「仲間」（西語 Amigo）</div>
+              </div>
+              <div class="ae-item">
+                <div class="ai-label">1 AMI の定義</div>
+                <div class="ai-val">歩行習慣による社会貢献を表す独自単位。<em>1</em> AMI = 1円換算（参考値）</div>
+              </div>
+              <div class="ae-item">
+                <div class="ai-label">参考換算（50代・地方都市の場合）</div>
+                <div class="ai-val">年間最大 <em>72,000</em> AMI 獲得可能（50代・通年歩行・イベント参加込み）</div>
+              </div>
+              <div class="ae-item">
+                <div class="ai-label">注意事項</div>
+                <div class="ai-val">AMIは参考値であり、金融商品・医療効果を保証するものではありません</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SNSシェア -->
+          <div class="share-row">
+            <button class="share-btn x-btn" onclick="shareX()">X（旧Twitter）でシェア</button>
+            <button class="share-btn" onclick="shareClip()">テキストをコピー</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ── 自己ダウンロード ──
+function downloadSelf(){
+  const html = document.documentElement.outerHTML;
+  const blob = new Blob(['<!DOCTYPE html>\n'+html], {type:'text/html;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'ami_passbook.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ── データストア ──
+const AMI_RATE = {
+  base: { 30:28000,40:45000,50:72000,60:98000,70:135000 },
+  region: { city:1.08,urban:1.0,rural:0.93 },
+  cont: [0,1.0,1.18,1.32,1.44,1.54,1.62,1.69,1.75,1.80,1.84],
+  achiev(d){ return d>=28?1.0:d>=21?0.85:d>=14?0.68:0.50; },
+  minBonus(m){ return m>=60?1.15:m>=45?1.08:m>=30?1.04:1.0; }
+};
+const AMI_PER_JPY = 1; // 1 AMI = 1円換算
+
+let records = JSON.parse(localStorage.getItem('ami_records')||'[]');
+let userName = localStorage.getItem('ami_name')||'';
+let userGoal = parseInt(localStorage.getItem('ami_goal')||'0');
+
+// ── AMI計算 ──
+function calcAMI(type, params){
+  const age = parseInt(document.getElementById('inp-age').value);
+  const reg  = document.getElementById('inp-region').value;
+  const base = AMI_RATE.base[age];
+  const rm   = AMI_RATE.region[reg];
+
+  if(type === 'event'){
+    const days = parseInt(params.days);
+    const mins = parseInt(params.mins);
+    const yrs  = parseInt(params.yrs);
+    const jpy  = Math.round(base * rm * AMI_RATE.achiev(days) * AMI_RATE.minBonus(mins) * AMI_RATE.cont[Math.min(yrs,10)]);
+    return Math.round(jpy * AMI_PER_JPY);
+  } else {
+    // 通年：月次換算（年間基準値÷12×達成率）
+    const days = parseInt(params.days);
+    const mins = parseInt(params.mins);
+    const daysInMonth = 30;
+    const achiev = AMI_RATE.achiev(Math.round(days * 31/daysInMonth));
+    const bonus  = AMI_RATE.minBonus(mins);
+    const jpy = Math.round(base * rm * achiev * bonus / 12);
+    return Math.round(jpy * AMI_PER_JPY);
+  }
+}
+
+// ── 記録追加 ──
+function addRecord(){
+  const name = document.getElementById('inp-name').value.trim();
+  const goal = parseInt(document.getElementById('inp-goal').value)||0;
+  if(name){ userName = name; localStorage.setItem('ami_name', name); }
+  if(goal){ userGoal = goal; localStorage.setItem('ami_goal', goal); }
+
+  const type = document.querySelector('input[name="rec-type"]:checked').value;
+  let rec, ami, label, sub, days;
+
+  if(type === 'event'){
+    const year = document.getElementById('ev-year').value;
+    const yrs  = document.getElementById('ev-yrs').value;
+    days = parseInt(document.getElementById('ev-days').value);
+    const mins = parseInt(document.getElementById('ev-min').value);
+    ami  = calcAMI('event',{days,mins,yrs});
+    label = `第${['','１','２','３','４'][parseInt(yrs)]}回 足の８０２０ウォーキング参加`;
+    sub   = `${year}年5月 · ${days}日達成 · 1日平均${mins}分`;
+    rec   = { type:'event', year, month:5, days, mins, yrs:parseInt(yrs), ami,
+              label, sub, date: year+'-05-31' };
+  } else {
+    const year  = document.getElementById('dy-year').value;
+    const month = document.getElementById('dy-month').value;
+    days = parseInt(document.getElementById('dy-days').value);
+    const mins  = parseInt(document.getElementById('dy-min').value);
+    ami  = calcAMI('daily',{days,mins});
+    label = `${year}年${month}月 通年歩行記録`;
+    sub   = `${days}日歩行 · 1日平均${mins}分`;
+    const mm = String(month).padStart(2,'0');
+    const dd = String(new Date(year,month,0).getDate()).padStart(2,'0');
+    rec = { type:'daily', year, month:parseInt(month), days, mins, ami,
+            label, sub, date:`${year}-${mm}-${dd}` };
+  }
+
+  records.push(rec);
+  records.sort((a,b)=>a.date.localeCompare(b.date));
+  localStorage.setItem('ami_records', JSON.stringify(records));
+  render();
+  switchTab('ledger', document.querySelectorAll('.tab')[0]);
+}
+
+// ── レンダリング ──
+function render(){
+  // 累計AMI
+  const total = records.reduce((s,r)=>s+r.ami,0);
+
+  // カバー
+  document.getElementById('total-ami').textContent = total.toLocaleString();
+  const jpy = Math.round(total / AMI_PER_JPY);
+  document.getElementById('total-ref').textContent =
+    `1 AMI = 1円換算・参考値 約 ${total.toLocaleString()} 円相当`;
+
+  // 今年の歩行日数
+  const thisYear = new Date().getFullYear().toString();
+  const walkDays = records.filter(r=>r.year===thisYear).reduce((s,r)=>s+r.days,0);
+  const pWalk = Math.min(walkDays/365*100,100);
+  document.getElementById('prog-walk').style.width = pWalk+'%';
+  document.getElementById('prog-walk-l').textContent = walkDays+'日';
+
+  // AMI目標進捗
+  if(userGoal>0){
+    const thisAMI = records.filter(r=>r.year===thisYear).reduce((s,r)=>s+r.ami,0);
+    const pAMI = Math.min(thisAMI/userGoal*100,100);
+    document.getElementById('prog-ami').style.width = pAMI+'%';
+    document.getElementById('prog-ami-l').textContent = thisAMI.toLocaleString()+' AMI';
+    document.getElementById('prog-ami-r').textContent = userGoal.toLocaleString()+' AMI';
+  }
+
+  // 取引履歴
+  const tbody = document.getElementById('ledger-body');
+  if(records.length===0){
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:32px;color:var(--ink-m);font-size:12px;">「記録を追加」から歩行データを入力してください</td></tr>';
+  } else {
+    let bal = 0;
+    tbody.innerHTML = records.map(r=>{
+      bal += r.ami;
+      const isEvent = r.type==='event';
+      const milestone = bal>=1000&&(bal-r.ami)<1000?'<span class="milestone">1,000 AMI達成</span>':
+                        bal>=3000&&(bal-r.ami)<3000?'<span class="milestone">3,000 AMI達成</span>':
+                        bal>=5000&&(bal-r.ami)<5000?'<span class="milestone">5,000 AMI達成</span>':'';
+      return `<tr class="${isEvent?'event-row':''}">
+        <td class="date-col">${r.date}</td>
+        <td class="desc-col">
+          <div class="desc-main">${r.label}${milestone}</div>
+          <div class="desc-sub">${r.sub}</div>
+        </td>
+        <td class="ami-col">+${r.ami.toLocaleString()}</td>
+        <td class="bal-col">${bal.toLocaleString()} <span style="font-size:9px;color:var(--ink-m)">AMI</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // 印刷ドキュメント
+  document.getElementById('pd-name').textContent = userName||'　　　　　　　';
+  document.getElementById('pd-total').textContent = total.toLocaleString();
+  document.getElementById('pd-no').textContent = `No. ${String(Date.now()).slice(-6)}`;
+  document.getElementById('pd-date').textContent =
+    new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'});
+
+  // 年次サマリー
+  const byYear = {};
+  let runBal = 0;
+  records.forEach(r=>{
+    if(!byYear[r.year]) byYear[r.year]={ami:0,days:0,types:new Set()};
+    byYear[r.year].ami  += r.ami;
+    byYear[r.year].days += r.days;
+    byYear[r.year].types.add(r.type);
+  });
+  runBal = 0;
+  const pdBody = document.getElementById('pd-table-body');
+  const years = Object.keys(byYear).sort();
+  if(years.length===0){
+    pdBody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--ink-m);">記録がありません</td></tr>';
+  } else {
+    pdBody.innerHTML = years.map(y=>{
+      runBal += byYear[y].ami;
+      const types = [...byYear[y].types].map(t=>t==='event'?'5月イベント':'通年歩行').join('・');
+      const isLast = y===years[years.length-1];
+      return `<tr class="${isLast?'highlight':''}">
+        <td class="yr">${y}年</td>
+        <td>${types}</td>
+        <td>${byYear[y].days}日</td>
+        <td class="ami">+${byYear[y].ami.toLocaleString()}</td>
+        <td class="bal">${runBal.toLocaleString()} AMI</td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+// ── タブ切り替え ──
+function switchTab(id, el){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── フォーム切り替え ──
+function switchRecType(){
+  const type = document.querySelector('input[name="rec-type"]:checked').value;
+  document.getElementById('form-event').style.display = type==='event'?'block':'none';
+  document.getElementById('form-daily').style.display = type==='daily'?'block':'none';
+}
+
+// ── SNSシェア ──
+function shareX(){
+  const total = records.reduce((s,r)=>s+r.ami,0);
+  const text = `私の「足の８０２０」社会貢献通帳の累計残高は ${total.toLocaleString()} AMI になりました！\n歩くことで、社会とつながっています。\n#足の８０２０ #AMI通帳 #歩いてつながる\nhttps://ashino8020.github.io/engine`;
+  window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(text));
+}
+function shareClip(){
+  const total = records.reduce((s,r)=>s+r.ami,0);
+  const text = `私の「足の８０２０」社会貢献通帳の累計残高は ${total.toLocaleString()} AMI になりました！ #足の８０２０ #AMI通帳`;
+  navigator.clipboard.writeText(text).then(()=>alert('コピーしました！'));
+}
+
+// 初期化
+render();
+document.getElementById('pd-date').textContent =
+  new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'});
+</script>
+</body>
+</html>
