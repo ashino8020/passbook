@@ -716,9 +716,14 @@ const AMI_RATE = {
 };
 const AMI_PER_JPY = 1; // 1 AMI = 1円換算
 
-let records = JSON.parse(localStorage.getItem('ami_records')||'[]');
-let userName = localStorage.getItem('ami_name')||'';
-let userGoal = parseInt(localStorage.getItem('ami_goal')||'0');
+let records = [];
+let userName = '';
+let userGoal = 0;
+try {
+  records  = JSON.parse(localStorage.getItem('ami_records')||'[]');
+  userName = localStorage.getItem('ami_name')||'';
+  userGoal = parseInt(localStorage.getItem('ami_goal')||'0');
+} catch(e) { console.warn('localStorage not available', e); }
 
 // ── AMI計算 ──
 function calcAMI(type, params){
@@ -749,8 +754,8 @@ function calcAMI(type, params){
 function addRecord(){
   const name = document.getElementById('inp-name').value.trim();
   const goal = parseInt(document.getElementById('inp-goal').value)||0;
-  if(name){ userName = name; localStorage.setItem('ami_name', name); }
-  if(goal){ userGoal = goal; localStorage.setItem('ami_goal', goal); }
+  if(name){ userName = name; try { localStorage.setItem('ami_name', name); } catch(e) {} }
+  if(goal){ userGoal = goal; try { localStorage.setItem('ami_goal', goal); } catch(e) {} }
 
   const type = document.querySelector('input[name="rec-type"]:checked').value;
   let rec, ami, label, sub, days;
@@ -781,7 +786,7 @@ function addRecord(){
 
   records.push(rec);
   records.sort((a,b)=>a.date.localeCompare(b.date));
-  localStorage.setItem('ami_records', JSON.stringify(records));
+  try { localStorage.setItem('ami_records', JSON.stringify(records)); } catch(e) {}
   render();
   switchTab('ledger', document.querySelectorAll('.tab')[0]);
 }
